@@ -3,9 +3,28 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use ApiPlatform\Core\Annotation\ApiResource;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
+use ApiPlatform\Core\Bridge\Doctrine\Orm\Filter\SearchFilter;
+
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\HistoriqueRepository")
+ * 
+ * @ApiResource(
+ *  collectionOperations={"get"},
+ *  itemOperations={"get"},
+ *  order={"date"="ASC"},
+ *  paginationEnabled=false * 
+ * ) 
+ * 
+ * @ApiFilter(PropertyFilter::class)
+ * @ApiFilter(SearchFilter::class, properties={
+ *     "societe": "exact",
+ *     "date": "exact",
+ * })
+ * 
  */
 class Historique
 {

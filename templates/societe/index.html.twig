@@ -35,7 +35,15 @@
               <tbody>
 			  {% for societe in societes %}
                 <tr>
-                  <td><a href="{{path('societe_detail', {id : societe.id})}}"><span data-feather="edit"></span></a></td>
+                  <td>
+                    <a href="{{path('societe_detail', {id : societe.id})}}"><span data-feather="edit"></span></a>
+                    <!-- Formulaire de suppression d'une société à réactiver après correction des contraintes en BD
+                    <form method="post" id="deleteFrm" action="{{ path('societe_delete', {'id': societe.id}) }}" onsubmit="return confirm('Etes-vous sur de vouloir supprimer cette société?');">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ societe.id) }}">
+                        <span data-feather="trash" id="deleteBtn"></span>
+                    </form>
+                    -->
+                  </td>
                   <td>{{societe.id}}</td>
                   <td>{{societe.nom}}</td>
                   <td>{{societe.dateImmat|date('d/m/Y h:m:s')}}</td>

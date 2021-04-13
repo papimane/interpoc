@@ -5,14 +5,14 @@ namespace App\Controller;
 use App\Entity\Adresse;
 
 use App\Entity\Societe;
+use App\Form\AdresseType;
 use App\Form\SocieteType;
-use App\Form\SocieteDetailType;
 use App\Entity\Historique;
 use App\Form\HistoriqueType;
-use App\Form\AdresseType;
+use App\Form\SocieteDetailType;
 use App\Event\SocieteActionEvent;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\Common\Persistence\ObjectManager;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -20,9 +20,9 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 class SocieteController extends AbstractController
 {
     /**
-     * @Route("/societe", name="societe")
+     * @Route("/", name="societe_list")
      */
-    public function index(Request $request, ObjectManager $manager, EventDispatcherInterface $eventDispatcher)
+    public function index(Request $request, EventDispatcherInterface $eventDispatcher)
     {
         $societe = new Societe();
         $frmSociete = $this->CreateForm(SocieteType::class , $societe);
@@ -32,25 +32,28 @@ class SocieteController extends AbstractController
         $frmSociete->handleRequest($request);
 		   if($frmSociete->isSubmitted())
 		   {
+               // Instancier un objet adresse 
                $adresse = new Adresse();
-
+                // Initialiser les attributs de l'objets avec les données du formulaire envoyé
                $adresse->setNumero($frmSociete->get('numeroAdr')->getData())
                         ->setTypeVoie($frmSociete->get('typeVoieAdr')->getData())
                         ->setNomVoie($frmSociete->get('nomVoieAdr')->getData())
                         ->setVille($frmSociete->get('villeAdr')->getData())
                         ->setCp($frmSociete->get('cpAdr')->getData());
-
+                // Initialiser l'objet société parent avec l'objet adresse qui vient d'être créé
                $societe->addAdresse($adresse);
                $adresse->addSociete($societe);
 
                $event = new SocieteActionEvent ($societe, $adresse);
                $eventName = SocieteActionEvent::NAME;
 
-               $manager->persist($adresse);
-               $manager->persist($societe);
-               $manager->flush();
+               $entityManager = $this->getDoctrine()->getManager();
+
+               $entityManager->persist($adresse);
+               $entityManager->persist($societe);
+               $entityManager->flush();
                $eventDispatcher->dispatch($eventName, $event);
-			   return $this->redirectToRoute('societe');
+			   return $this->redirectToRoute('societe_list');
 
 		   }		
 		}
@@ -66,9 +69,9 @@ class SocieteController extends AbstractController
     }
 
     /**
-     * @Route("/societe/detail/{id}", name="societe_detail")
+     * @Route("societe/detail/{id}", name="societe_detail")
      */
-    public function detailSociete(Request $request, ObjectManager $manager, Societe $societe, EventDispatcherInterface $eventDispatcher)
+    public function detailSociete(Request $request, Societe $societe, EventDispatcherInterface $eventDispatcher)
     {
 
 
@@ -86,23 +89,19 @@ class SocieteController extends AbstractController
                 ->getRepository(Adresse::class)
                 ->find($idAdrDefaut);
 
-               /*$adresse->setNumero($frmSociete->get('numeroAdr')->getData())
-                        ->setTypeVoie($frmSociete->get('typeVoieAdr')->getData())
-                        ->setNomVoie($frmSociete->get('nomVoieAdr')->getData())
-                        ->setVille($frmSociete->get('villeAdr')->getData())
-                        ->setCp($frmSociete->get('cpAdr')->getData());*/
-
                $societe->addAdresse($adresse);
                $adresse->addSociete($societe);
 
                $event = new SocieteActionEvent ($societe, $adresse);
                $eventName = SocieteActionEvent::NAME;
 
-               $manager->persist($adresse);
-               $manager->persist($societe);
-               $manager->flush();
+               $entityManager = $this->getDoctrine()->getManager();
+               
+               $entityManager->persist($adresse);
+               $entityManager->persist($societe);
+               $entityManager->flush();
                $eventDispatcher->dispatch($eventName, $event);
-			   return $this->redirectToRoute('societe');
+			   return $this->redirectToRoute('societe_list');
 
 		   }		
 		}         
@@ -127,5 +126,19 @@ class SocieteController extends AbstractController
         ]);    
 
 
+    }
+
+    /**
+     * @Route("societe/{id}/delete", name="societe_delete", methods={"POST"})
+     */
+    public function delete(Request $request, Societe $societe): Response
+    {
+        if ($this->isCsrfTokenValid('delete'.$societe->getId(), $request->request->get('_token'))) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager->remove($societe);
+            $entityManager->flush();
+        }
+
+        return $this->redirectToRoute('societe_list');
     }
 }

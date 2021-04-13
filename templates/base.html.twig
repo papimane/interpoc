@@ -26,7 +26,7 @@
           <div class="sidebar-sticky">
             <ul class="nav flex-column">
               <li class="nav-item">
-                <a class="nav-link active" href="{{path("societe")}}">
+                <a class="nav-link active" href="{{path("societe_list")}}">
                   <span data-feather="home"></span>
                   Gestion des sociétés <span class="sr-only">(current)</span>
                 </a>
@@ -59,4 +59,11 @@
     </script>
 
   </body>
+  <script>
+  $(document).ready(function(){
+   $('#deleteBtn').click(function(){
+     $("#deleteFrm").submit();
+   });
+})
+  </script>
 </html>

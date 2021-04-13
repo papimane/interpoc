@@ -9,25 +9,16 @@ use App\Event\SocieteActionEvent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 
 class AdresseController extends AbstractController
 {
-    /**
-     * @Route("/adresse", name="adresse")
-     */
-    public function index()
-    {
-        return $this->render('adresse/index.html.twig', [
-            'controller_name' => 'AdresseController',
-        ]);
-    }
 
     /**
+     * Ajouter une adresse à une société
      * @Route("/adresse/add", name="adresse_add")
      */
-    public function addAdresse(Request $request, EntityManagerInterface $manager, EventDispatcherInterface $eventDispatcher)
+    public function addAdresse(Request $request, EventDispatcherInterface $eventDispatcher)
     {
         
         $adresse = new Adresse();
@@ -49,9 +40,12 @@ class AdresseController extends AbstractController
                $idSociete = $societe->getId();
                $societe->addAdresse($adresse);
                $adresse->addSociete($societe);
-               $manager->persist($adresse);
-               $manager->persist($societe);
-               $manager->flush();
+
+               $entityManager = $this->getDoctrine()->getManager();
+               
+               $entityManager->persist($adresse);
+               $entityManager->persist($societe);
+               $entityManager->flush();
                $eventDispatcher->dispatch($eventName, $event);
 			   return $this->redirectToRoute('societe_detail',["id"=>$idSociete]);
 
@@ -63,7 +57,6 @@ class AdresseController extends AbstractController
 		
 		return $this->render('societe/index.html.twig', [
             'societes' => $societes,
-            'frmSociete' => $frmSociete->createView(),
         ]); 
     }
 }

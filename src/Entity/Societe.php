@@ -2,15 +2,30 @@
 
 namespace App\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use ApiPlatform\Core\Annotation\ApiFilter;
+use Doctrine\Common\Collections\Collection;
+use ApiPlatform\Core\Annotation\ApiResource;
+use Doctrine\Common\Collections\ArrayCollection;
+use ApiPlatform\Core\Serializer\Filter\PropertyFilter;
 use Symfony\Component\Validator\Constraints as Assert;
 
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\SocieteRepository")
+ * 
+ * @ApiResource(
+ *  collectionOperations={"get"},
+ *  itemOperations={"get"},
+ *  order={"date"="ASC"},
+ *  paginationEnabled=false * 
+ * )  * 
+ * 
+ * 
+ * @ApiFilter(PropertyFilter::class)
  */
+
+
 class Societe
 {
     /**
